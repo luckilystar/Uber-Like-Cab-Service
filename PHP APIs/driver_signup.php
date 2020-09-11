@@ -32,8 +32,11 @@ else
             $verification_code = password_hash(rand(100000, 999999) , PASSWORD_DEFAULT);
             $register_user_query = "INSERT INTO drivers (driver_name, phone, email, password, verification_code, cab_no) VALUES ('$name', '$phone', '$email', '$password', '$verification_code', '$cab_no')";
             $result = mysqli_query($con, $register_user_query);
+         
             if ($result)
             {
+                $register_cab_query = "INSERT INTO cabs (cab_id,cab_no, cab_lat, cab_lng, on_trip, cab_bearing) VALUES (NULL,'$cab_no', '', '', '0', '0')";
+                $result = mysqli_query($con, $register_cab_query);
                 $to = $email;
                 $subject = "Near Cabs Verification Email";
                 $message = '

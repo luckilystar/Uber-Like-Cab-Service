@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "997507610793",
+    "firebase_url": "https://uber-clone-289017.firebaseio.com",
+    "project_id": "uber-clone-289017",
+    "storage_bucket": "uber-clone-289017.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997507610793:android:e659b1deda242c12ad91b8",
+        "android_client_info": {
+          "package_name": "com.nearcabs.driverapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "997507610793-0ud2ohl4906017m790mg3fq2dqh17hda.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRk7Y8DPYfGqyzazfaN02SU7cf5icOZUs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "997507610793-0ud2ohl4906017m790mg3fq2dqh17hda.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

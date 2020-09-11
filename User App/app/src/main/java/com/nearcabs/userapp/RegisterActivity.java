@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -99,7 +99,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             String data = "name=" + URLEncoder.encode(inputName, "UTF-8") + "&phone=" + URLEncoder.encode(inputPhone, "UTF-8") + "&email=" + URLEncoder.encode(inputEmail, "UTF-8") + "&password=" + URLEncoder.encode(inputPassword, "UTF-8");
 //            data= URLEncoder.encode(data,"UTF-8");
-//            Toast.makeText(getApplicationContext(),data,Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),data,Toast.LENGTH_LONG).show();
             writer.write(data);
             writer.flush();
             writer.close();
@@ -113,12 +113,12 @@ public class RegisterActivity extends AppCompatActivity {
             }
 //            line=bufferedReader.readLine();
 
-//            Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG).show();
 //            conn.connect();
 
             JSONObject response_data = new JSONObject(response);
             if (response_data.getString("status").equals("1")) {
-//                Toast.makeText(getApplicationContext(), response_data.getString("data").toString(),Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), response_data.getString("data").toString(),Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(intent);
             } else {
@@ -127,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         } catch (Exception e) {
-//            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
         }
 
 

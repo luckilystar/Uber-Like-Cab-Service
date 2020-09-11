@@ -4,7 +4,7 @@ package com.nearcabs.driverapp;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.StrictMode;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public void login() {
         try {
-            URL url = new URL(getString(R.string.server_url) + "/api/driver_login.php");
+            URL url = new URL(getString(R.string.server_url) + "/driver_login.php");
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod("POST");
             httpURLConnection.setDoOutput(true);

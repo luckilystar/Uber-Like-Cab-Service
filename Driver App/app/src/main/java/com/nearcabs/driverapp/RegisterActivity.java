@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -85,7 +85,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void InsertData() {
         try {
-            URL url = new URL(getString(R.string.server_url) + "/api/driver_signup.php");
+            URL url = new URL(getString(R.string.server_url) + "/driver_signup.php");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setDoInput(true);

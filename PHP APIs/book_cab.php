@@ -1,13 +1,4 @@
 <?php require ('constants.php');
-$con = mysqli_connect($dbServer, $dbUsername, $dbPassword, $dbName);
-if (!$con)
-{
-    $response = array(
-        "status" => "0",
-        "data" => "Error Connecting to Database!"
-    );
-    die(json_encode($response));
-}
 $src_lat = $_POST['src_lat'];
 $src_lng = $_POST['src_lng'];
 $dest_lat = $_POST['dest_lat'];
@@ -39,7 +30,7 @@ if ($result)
     $fare = sqrt(($dest_lat - $src_lat) * ($dest_lat - $src_lat) + ($dest_lng - $src_lng) * ($dest_lng - $src_lng)) * 111 * 20;
     $fare = (int)$fare;
     $booked_at = time();
-    $book_ride_query = "INSERT INTO rides (driver_id, user_id, src_lat, src_lng, dest_lat, dest_lng, fare, otp, booked_at) values ('$driver_id', '$user_id', '$src_lat', '$src_lng', '$dest_lat', '$dest_lng', '$fare', '$otp', '$booked_at')";
+    $book_ride_query = "INSERT INTO rides (driver_id, user_id, src_lat, src_lng, dest_lat, dest_lng, fare, otp, booked_at,status) values ('$driver_id', '$user_id', '$src_lat', '$src_lng', '$dest_lat', '$dest_lng', '$fare', '$otp', '$booked_at','1')";
     $change_on_trip_query = "UPDATE cabs SET on_trip=1 WHERE cab_id='$cab_id'";
     $book_ride_result = mysqli_query($con, $book_ride_query);
     $change_on_trip_result = mysqli_query($con, $change_on_trip_query);
@@ -86,7 +77,7 @@ if ($result)
                 curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
                     'Content-Type: application/json; charset=utf-8',
-                    'Authorization: Basic OGIzOGE3MjgtYTQ4Ni00ODI1LWI5NjktMjRkZWM0ZjFhMjZl'
+                    'Authorization: Basic ODgzNjVmYWYtZmI0ZC00ZmMwLWFmZjAtMThkOGYwNGEzYjBj'
                 ));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_HEADER, false);

@@ -19,9 +19,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -40,9 +40,6 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -53,6 +50,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.libraries.places.api.net.PlacesClient;
 
 import org.json.JSONObject;
 
@@ -67,6 +73,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -100,6 +107,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ProgressDialog progressDialog;
     Timer timer;
     Handler handler;
+    List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.ID, Place.Field.PHONE_NUMBER, Place.Field.RATING, Place.Field.WEBSITE_URI);
+
+    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,6 +161,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         source_location = (EditText) findViewById(R.id.source_location);
         destination_location = (EditText) findViewById(R.id.destination_location);
 
+        String apiKey = getString(R.string.google_maps_key);
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), apiKey);
+        }
+
+        // Create a new Places client instance.
+//        placesClient = Places.createClient(this);
+
 
         btnBookNow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,7 +197,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             nearby_cab.remove();
                         }
 
-//                        MarkerOptions markerOptions1=new MarkerOptions();
+                        MarkerOptions markerOptions1=new MarkerOptions();
                         JSONObject book_cab_response_data = response_data.getJSONObject("data");
 
                         ride_id = book_cab_response_data.getString("ride_id");
@@ -198,8 +216,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         fare = "Rs. " + book_cab_response_data.getString("fare");
 
-                        cab_no_a.setText(cab_no.split(" ")[0]);
-                        cab_no_b.setText(cab_no.split(" ")[1]);
+                        cab_no_a.setText(cab_no);
+//                        if(cab_no.split(" ").length>0)
+//                            cab_no_b.setText(cab_no.split(" ")[1]);
 
                         ride_driver_name.setText(driver_name);
                         ride_otp.setText(otp);
@@ -288,18 +307,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onFocusChange(View view, boolean b) {
                 if (b) {
                     try {
-//                        Intent intent =
-//                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(activity);
-//                        startActivityForResult(intent, AUTOCOMPLETE_SOURCE);
-                        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-                        startActivityForResult(builder.build(activity), AUTOCOMPLETE_SOURCE);
-                    } catch (GooglePlayServicesRepairableException e) {
+                        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                                .build(activity);
+                        startActivityForResult(intent, AUTOCOMPLETE_SOURCE);
+                    } catch (Exception e) {
                         // TODO: Handle the error.
-//                        Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-                    } catch (GooglePlayServicesNotAvailableException e) {
-                        // TODO: Handle the error.
-//                        Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-
+                        Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -310,18 +323,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 try {
-//                    Intent intent =
-//                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(activity);
-//                    startActivityForResult(intent, AUTOCOMPLETE_SOURCE);
-                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-                    startActivityForResult(builder.build(activity), AUTOCOMPLETE_SOURCE);
-                } catch (GooglePlayServicesRepairableException e) {
+                    Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                            .build(activity);
+                    startActivityForResult(intent, AUTOCOMPLETE_SOURCE);
+                } catch (Exception e) {
                     // TODO: Handle the error.
-//                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-                } catch (GooglePlayServicesNotAvailableException e) {
-                    // TODO: Handle the error.
-//                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-
+                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -330,21 +337,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         destination_location.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-//                Toast.makeText(getApplicationContext(), "Destination", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Destination", Toast.LENGTH_SHORT).show();
                 if (b) {
                     try {
-//                        Intent intent =
-//                                new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(activity);
-//                        startActivityForResult(intent, AUTOCOMPLETE_DESTINATITON);
-                        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-                        startActivityForResult(builder.build(activity), AUTOCOMPLETE_DESTINATITON);
-                    } catch (GooglePlayServicesRepairableException e) {
+                        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                                .build(activity);
+                        startActivityForResult(intent, AUTOCOMPLETE_DESTINATITON);
+                    } catch (Exception e) {
                         // TODO: Handle the error.
-//                        Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-                    } catch (GooglePlayServicesNotAvailableException e) {
-                        // TODO: Handle the error.
-//                        Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-
+                        Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -355,18 +356,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 try {
-//                    Intent intent =
-//                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).build(activity);
-//                    startActivityForResult(intent, AUTOCOMPLETE_DESTINATITON);
-                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-                    startActivityForResult(builder.build(activity), AUTOCOMPLETE_DESTINATITON);
-                } catch (GooglePlayServicesRepairableException e) {
+                    Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                            .build(activity);
+                    startActivityForResult(intent, AUTOCOMPLETE_DESTINATITON);
+                } catch (Exception e) {
                     // TODO: Handle the error.
-//                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-                } catch (GooglePlayServicesNotAvailableException e) {
-                    // TODO: Handle the error.
-//                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
-
+                    Toast.makeText(getApplicationContext(), e.getMessage().toString(), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -376,7 +371,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
     }
 
 
@@ -468,7 +462,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return response_data;
 
         } catch (Exception e) {
-//            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
         }
 
         return null;
@@ -476,85 +470,85 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == AUTOCOMPLETE_SOURCE) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(this, data);
-                Log.i(TAG, "Place: " + place.getName());
-                source_location.setText(place.getName());
+        if (data != null) {
+            if (requestCode == AUTOCOMPLETE_SOURCE) {
+                if (resultCode == RESULT_OK) {
+                    Place place = Autocomplete.getPlaceFromIntent(data);
+                    Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+                    source_location.setText(place.getName());
 
-                if (source_location_marker != null) {
-                    source_location_marker.remove();
-                }
+                    if (source_location_marker != null) {
+                        source_location_marker.remove();
+                    }
 
-                LatLng latLng = place.getLatLng();
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng);
-                markerOptions.title("Source");
+                    LatLng latLng = place.getLatLng();
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(latLng);
+                    markerOptions.title("Source");
 //                BitmapDrawable bitmapDrawable = (BitmapDrawable) getResources().getDrawable(R.drawable.car);
 //                Bitmap b = bitmapDrawable.getBitmap();
 //                Bitmap smallCar = Bitmap.createScaledBitmap(b, 150, 81, false);
 
 //                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(smallCar));
 //                markerOptions.rotation(location.getBearing());
-                source_location_marker = mMap.addMarker(markerOptions);
+                    source_location_marker = mMap.addMarker(markerOptions);
 
+                    setNearbyCabsOnMap(latLng);
 
-                setNearbyCabsOnMap(latLng);
+                } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                    Status status = Autocomplete.getStatusFromIntent(data);
+                    // TODO: Handle the error.
+                    Log.i(TAG, status.getStatusMessage());
 
-
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: Handle the error.
-                Log.i(TAG, status.getStatusMessage());
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-        } else if (requestCode == AUTOCOMPLETE_DESTINATITON) {
-            if (resultCode == RESULT_OK) {
-//                Place place = PlaceAutocomplete.getPlace(this, data);
-                Place place = PlacePicker.getPlace(this, data);
-                Log.i(TAG, "Place: " + place.getName());
-                destination_location.setText(place.getName());
-
-                if (destination_location_marker != null) {
-                    destination_location_marker.remove();
+                } else if (resultCode == RESULT_CANCELED) {
+                    // The user canceled the operation.
                 }
+            } else if (requestCode == AUTOCOMPLETE_DESTINATITON) {
+                if (resultCode == RESULT_OK) {
+                    Place place = Autocomplete.getPlaceFromIntent(data);
+                    Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+                    destination_location.setText(place.getName());
 
-                LatLng latLng = place.getLatLng();
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng);
-                markerOptions.title("Destination");
+                    if (destination_location_marker != null) {
+                        destination_location_marker.remove();
+                    }
+
+                    LatLng latLng = place.getLatLng();
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(latLng);
+                    markerOptions.title("Destination");
 //                BitmapDrawable bitmapDrawable = (BitmapDrawable) getResources().getDrawable(R.drawable.car);
 //                Bitmap b = bitmapDrawable.getBitmap();
 //                Bitmap smallCar = Bitmap.createScaledBitmap(b, 150, 81, false);
 
 //                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(smallCar));
 //                markerOptions.rotation(location.getBearing());
-                destination_location_marker = mMap.addMarker(markerOptions);
+                    destination_location_marker = mMap.addMarker(markerOptions);
 
 
-                if (!source_location.getText().toString().equals("") && !destination_location.getText().toString().equals("")) {
-                    String url = getDirectionsUrl(source_location_marker.getPosition(), destination_location_marker.getPosition());
-                    DownloadTask downloadTask = new DownloadTask();
+                    if (!source_location.getText().toString().equals("") && !destination_location.getText().toString().equals("")) {
+                        String url = getDirectionsUrl(source_location_marker.getPosition(), destination_location_marker.getPosition());
+                        DownloadTask downloadTask = new DownloadTask();
 
-                    // Start downloading json data from Google Directions API
-                    downloadTask.execute(url);
+                        // Start downloading json data from Google Directions API
+                        downloadTask.execute(url);
 
-                    btnBookNow.setVisibility(View.VISIBLE);
-                } else {
-                    btnBookNow.setVisibility(View.GONE);
+                        btnBookNow.setVisibility(View.VISIBLE);
+                    } else {
+                        btnBookNow.setVisibility(View.GONE);
+                    }
+
+                } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                    Status status = Autocomplete.getStatusFromIntent(data);
+                    // TODO: Handle the error.
+                    Log.i(TAG, status.getStatusMessage());
+
+                } else if (resultCode == RESULT_CANCELED) {
+                    // The user canceled the operation.
                 }
-
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: Handle the error.
-                Log.i(TAG, status.getStatusMessage());
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
             }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 
@@ -797,10 +791,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     == PackageManager.PERMISSION_GRANTED) {
                 buildGoogleApiClient();
                 mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
             }
         } else {
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
     }
 

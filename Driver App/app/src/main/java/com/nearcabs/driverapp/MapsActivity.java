@@ -6,7 +6,9 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -16,9 +18,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +40,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -136,7 +139,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 try {
-                    String api_url = getString(R.string.server_url) + "/api/end_ride.php";
+                    String api_url = getString(R.string.server_url) + "/end_ride.php";
 
                     String end_ride_request = "ride_id=" + URLEncoder.encode(ride_id, "UTF-8") + "&cab_id=" + URLEncoder.encode(cab_id, "UTF-8");
 
@@ -204,18 +207,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void idsAvailable(String userId, String registrationId) {
                 sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
                 if (registrationId != null) {
-//                    Toast.makeText(getApplicationContext(), userId, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), userId, Toast.LENGTH_LONG).show();
                     Log.d("debug", "registrationId:" + userId);
 
 
                     try {
-                        String api_url = getString(R.string.server_url) + "/api/driver_set_one_signal_id.php";
+                        String api_url = getString(R.string.server_url) + "/driver_set_one_signal_id.php";
 
                         String driver_set_one_signal_id_request = "driver_id=" + URLEncoder.encode(sharedPreferences.getString("id", null), "UTF-8") + "&one_signal_id=" + URLEncoder.encode(userId, "UTF-8");
 
                         JSONObject response_data = call_api(api_url, driver_set_one_signal_id_request);
 
-//                        Toast.makeText(getApplicationContext(), response_data.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), response_data.toString(), Toast.LENGTH_LONG).show();
 
                     } catch (Exception e) {
                         Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -263,7 +266,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         try {
-            String api_url = getString(R.string.server_url) + "/api/check_current_booking.php";
+            String api_url = getString(R.string.server_url) + "/check_current_booking.php";
 
             String check_current_booking_request = "driver_id=" + URLEncoder.encode(sharedPreferences.getString("id", null), "UTF-8");
 
@@ -361,7 +364,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public void run() {
             try {
-                String api_url = getString(R.string.server_url) + "/api/set_cab_location.php";
+                String api_url = getString(R.string.server_url) + "/set_cab_location.php";
 
                 String set_cab_location_request = "cab_id=" + URLEncoder.encode(sharedPreferences.getString("cab_no", null), "UTF-8") + "&lat=" + URLEncoder.encode(String.valueOf(mLastLocation.getLatitude()), "UTF-8") + "&lng=" + URLEncoder.encode(String.valueOf(mLastLocation.getLongitude()), "UTF-8") + "&bearing=" + URLEncoder.encode(String.valueOf(mLastLocation.getBearing()), "UTF-8");
 
@@ -605,10 +608,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     == PackageManager.PERMISSION_GRANTED) {
                 buildGoogleApiClient();
                 mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
             }
         } else {
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
     }
 
@@ -647,7 +652,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-
 
         if (!exampleNotificationReceivedHandler.customerPhone.equals("0000000000") && !isTripDataSet) {
             customer_name = exampleNotificationReceivedHandler.customerName.toString();
@@ -758,11 +762,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
 
-
         mLastLocation = location;
 
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(latLng)      // Sets the center of the map to Mountain View
@@ -771,8 +773,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .tilt(90)                   // Sets the tilt of the camera to 30 degrees
                 .build();                   // Creates a CameraPosition from the builder
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        setCabsOnMap(latLng);
 
 
+    }
+
+    public void setCabsOnMap(LatLng latLng) {
+        try {
+            String api_url = getString(R.string.server_url) + "/set_cab_location.php";
+
+            double user_lat = latLng.latitude;
+            double user_lng = latLng.longitude;
+
+            String set_location_cabs_request =
+                    "lat=" + URLEncoder.encode(String.valueOf(user_lat), "UTF-8")
+                    + "&lng=" + URLEncoder.encode(String.valueOf(user_lng), "UTF-8")
+                    + "&cab_id=" + URLEncoder.encode(sharedPreferences.getString("cab_no", null), "UTF-8")
+                    + "&bearing=" + URLEncoder.encode(String.valueOf(0), "UTF-8");
+
+            JSONObject response_data = call_api(api_url, set_location_cabs_request);
+            if (response_data.getString("status").equals("1")) {
+//                Toast.makeText(getApplicationContext(), "Update cabs location", Toast.LENGTH_LONG).show();
+            } else {
+//                Toast.makeText(getApplicationContext(), "No cabs nearby", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+          Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
+        }
     }
 
 
