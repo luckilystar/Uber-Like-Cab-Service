@@ -43,6 +43,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MapsActivity" />
+        <activity android:name=".UserEditActivity"></activity>
+        <activity android:name=".ChangeProfileActivity"></activity>
         <activity android:name=".LoginActivity"></activity>
     </application>
 

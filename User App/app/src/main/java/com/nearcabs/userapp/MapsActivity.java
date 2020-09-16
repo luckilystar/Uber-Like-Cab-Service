@@ -100,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Button btnBookNow;
     ImageView cab;
     RelativeLayout driver_info;
-    LinearLayout ll_call, ll_share, ll_cancel;
+    LinearLayout ll_call, ll_share, ll_cancel, edit_profile;
     String driver_name, cab_no, cab_id, otp, fare, driver_phone, ride_id;
     TextView cab_no_a, cab_no_b, ride_otp, ride_driver_name, ride_fare;
     String PREFS_NAME = "auth_info";
@@ -214,7 +214,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         otp = "OTP : " + book_cab_response_data.getString("otp");
 
 
-                        fare = "Rs. " + book_cab_response_data.getString("fare");
+                        fare = "RM. " + book_cab_response_data.getString("fare");
 
                         cab_no_a.setText(cab_no);
 //                        if(cab_no.split(" ").length>0)
@@ -268,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         btnBookNow.setVisibility(View.VISIBLE);
                                     }
                                 } catch (Exception e) {
-//                                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -366,6 +366,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        edit_profile = (LinearLayout) findViewById(R.id.edit_profile);
+        edit_profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), UserEditActivity.class);
+                startActivity(intent);
+            }
+        });
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -389,6 +397,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                Toast.makeText(getApplicationContext(), response_data.toString(), Toast.LENGTH_LONG).show();
 
                 if (response_data.getString("status").equals("1")) {
+                    ll_cancel.setClickable(true);
                     if (nearby_cab != null) {
                         nearby_cab.remove();
                     }
@@ -410,7 +419,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     handler.postDelayed(this, 10000);
                 } else if (response_data.getString("status").equals("2")) {
-                    ll_cancel.setClickable(false);
+                    ll_cancel.setClickable(true);
                     handler.removeCallbacksAndMessages(runnable);
                     if (nearby_cab != null) {
                         nearby_cab.remove();
@@ -419,7 +428,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     tripStarted = true;
                     cab.setVisibility(View.VISIBLE);
                 } else if (response_data.getString("status").equals("3")) {
-                    ll_cancel.setClickable(false);
+                    ll_cancel.setClickable(true);
                     handler.removeCallbacksAndMessages(runnable);
                 } else {
                     handler.postDelayed(this, 10000);
@@ -878,7 +887,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         if (tripStarted) {
-
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLng)      // Sets the center of the map to Mountain View
                     .zoom(mMap.getCameraPosition().zoom)                   // Sets the zoom
@@ -886,7 +894,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .tilt(90)                   // Sets the tilt of the camera to 30 degrees
                     .build();                   // Creates a CameraPosition from the builder
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
         }
 
     }

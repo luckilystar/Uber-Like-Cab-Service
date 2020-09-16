@@ -11,16 +11,25 @@ if (!$con)
     die(json_encode($response));
 }
 $endRideQuery = "UPDATE rides SET status=2 WHERE ride_id='$ride_id'";
-$endRideQuery2 = "UPDATE cabs SET on_trip=0 WHERE cab_id='$cab_id'";
 $result2 = mysqli_query($con, $endRideQuery);
-$result3 = mysqli_query($con, $endRideQuery2);
-if ($result2 && $result3)
+if ($result2)
 {
-    $response = array(
-        "status" => "1",
-        "data" => "End of Ride!"
-    );
-    die(json_encode($response));
+    
+    $endRideQuery2 = "UPDATE cabs SET on_trip=0 WHERE cab_id='$cab_id'";
+    $result3 = mysqli_query($con, $endRideQuery2);
+    if($result3){
+        $response = array(
+            "status" => "1",
+            "data" => "End of Ride!"
+        );
+        die(json_encode($response));
+    }else{
+        $response = array(
+            "status" => "0",
+            "data" => "Unable to end ride"
+        );
+        die(json_encode($response));
+    }
 }
 else
 {
